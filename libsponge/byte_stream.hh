@@ -10,7 +10,11 @@
 //! and then no more bytes can be written.
 class ByteStream {
   private:
-    // Your code here -- add private members as necessary.
+    size_t _capacity = 0;
+    std::string buf = std::string();
+    bool _input_ended = false;
+    int _read = 0;
+    int _written = 0;
 
     // Hint: This doesn't need to be a sophisticated data structure at
     // all, but if any of your tests are taking longer than a second,
