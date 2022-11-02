@@ -20,6 +20,10 @@ class TCPReceiver {
     //! The maximum number of bytes we'll store.
     size_t _capacity;
 
+    WrappingInt32 _isn{0};
+    WrappingInt32 _ackno{0};
+    bool have_isn = false;
+
   public:
     //! \brief Construct a TCP receiver
     //!
@@ -61,6 +65,8 @@ class TCPReceiver {
     ByteStream &stream_out() { return _reassembler.stream_out(); }
     const ByteStream &stream_out() const { return _reassembler.stream_out(); }
     //!@}
+
+    void update_ackno() ;
 };
 
 #endif  // SPONGE_LIBSPONGE_TCP_RECEIVER_HH

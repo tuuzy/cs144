@@ -19,19 +19,19 @@ StreamReassembler::StreamReassembler(const size_t capacity) : _output(capacity),
 //! contiguous substrings and writes them into the output stream in order.
 void StreamReassembler::push_substring(const string &data, const size_t index, const bool eof) {
     size_t last_index = index + data.size();
-    size_t first_unaccessable = _output.bytes_read() + _capacity;
+    size_t first_unacceptable = _output.bytes_read() + _capacity;
     size_t first_unassembled = _output.bytes_written();
 
     // Position.
     size_t begin_idx = first_unassembled > index ? first_unassembled : index;
-    size_t end_idx = last_index > first_unaccessable ? first_unaccessable : last_index;
+    size_t end_idx = last_index > first_unacceptable ? first_unacceptable : last_index;
     
     
     // eof
     if(eof) _eof = last_index;
 
     // Drop substring if it can't be received.
-    if(index >= first_unaccessable || last_index-1 < first_unassembled || !data.size()){
+    if(index >= first_unacceptable || last_index-1 < first_unassembled || !data.size()){
         // Data is empty.
         if(!data.size()){
             if(end_idx == _eof) _output.end_input();
@@ -94,3 +94,7 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
 size_t StreamReassembler::unassembled_bytes() const { return {_unassembled_bytes}; }
 
 bool StreamReassembler::empty() const { return {!unassembled_bytes()}; }
+
+size_t StreamReassembler::first_unassembled() const { return {_output.bytes_written()}; }
+
+size_t StreamReassembler::first_unacceptable() const { return {_output.bytes_read() + _capacity}; }

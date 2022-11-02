@@ -11,9 +11,39 @@ void DUMMY_CODE(Targs &&... /* unused */) {}
 using namespace std;
 
 void TCPReceiver::segment_received(const TCPSegment &seg) {
-    DUMMY_CODE(seg);
+    // bool SYN = seg.header().syn;
+    if(!have_isn){    
+        if(seg.header().syn){
+            _isn = seg.header().seqno;
+            _reassembler.push_substring(seg.payload().copy(), 0, seg.header().fin);
+            have_isn = true;
+            update_ackno();
+        }
+        return;       
+    }
+
+    uint64_t abs_seqno = unwrap(seg.header().seqno, _isn, _reassembler.first_unassembled());
+
+    _reassembler.push_substring(seg.payload().copy(), abs_seqno - 1, seg.header().fin);
+    update_ackno();
 }
 
-optional<WrappingInt32> TCPReceiver::ackno() const { return {}; }
+void TCPReceiver::update_ackno() {
+    if(_reassembler.stream_out().input_ended()){
+        _ackno = wrap(_reassembler.first_unassembled() + 2, _isn);
+    }
+    else{
+        _ackno = wrap(_reassembler.first_unassembled() + 1, _isn);
+    };
+}
 
-size_t TCPReceiver::window_size() const { return {}; }
+optional<WrappingInt32> TCPReceiver::ackno() const {
+    if(have_isn){
+        return _ackno;
+    }
+    else{
+        return {};
+    }
+}
+
+size_t TCPReceiver::window_size() const { return _reassembler.first_unacceptable() - _reassembler.first_unassembled(); }

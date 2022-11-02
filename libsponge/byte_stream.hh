@@ -13,8 +13,8 @@ class ByteStream {
     size_t _capacity = 0;
     std::string buf = std::string();
     bool _input_ended = false;
-    int _read = 0;
-    int _written = 0;
+    size_t _read = 0;
+    size_t _written = 0;
 
     // Hint: This doesn't need to be a sophisticated data structure at
     // all, but if any of your tests are taking longer than a second,
